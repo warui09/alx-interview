@@ -6,8 +6,9 @@ triangle of n
     - n is assumed to always be an integer
 """
 
+
 def pascal_triangle(n):
-    """ Return a list of integers representing Pascal's triangle"""
+    """Return a list of integers representing Pascal's triangle"""
 
     triangle = []
 
@@ -29,7 +30,6 @@ def pascal_triangle(n):
 
             # append element to row
             row.append(element)
-
 
         # append row to triangle
         triangle.append(row)
