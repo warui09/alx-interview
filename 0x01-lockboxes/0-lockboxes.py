@@ -10,21 +10,11 @@ def canUnlockAll(boxes):
 
     """
 
-    unlocked = False
-    keys = []
-    last_unlocked = 0
+    keys = [0]
 
-    for idx, box in enumerate(boxes):
-        if idx == 0:
-            unlocked = True
-        elif idx in keys:
-            last_unlocked = idx
-            unlocked = True
+    for key in keys:
+        for new_key in boxes[key]:
+            if new_key not in keys and key < len(boxes):
+                keys.append(new_key)
 
-        if not unlocked:
-            break
-        else:
-            for key in box:
-                keys.append(key)
-
-    return last_unlocked == len(boxes) - 1
+    return len(keys) == len(boxes)
