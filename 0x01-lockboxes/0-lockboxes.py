@@ -11,13 +11,11 @@ def canUnlockAll(boxes):
     """
 
     unlocked = False
-    keys = []
+    keys = [0]
     last_unlocked = 0
 
     for idx, box in enumerate(boxes):
-        if idx == 0:
-            unlocked = True
-        elif idx in keys:
+        if idx in keys:
             last_unlocked = idx
             unlocked = True
 
@@ -25,6 +23,7 @@ def canUnlockAll(boxes):
             break
         else:
             for key in box:
-                keys.append(key)
+                if key not in keys:
+                    keys.append(key)
 
     return last_unlocked == len(boxes) - 1
