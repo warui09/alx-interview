@@ -5,7 +5,7 @@ import fileinput
 import signal
 
 count = 0
-codes = { 200: 0, 301: 0, 400: 0, 401: 0, 403: 0, 404: 0, 405: 0, 500: 0 }
+codes = {200: 0, 301: 0, 400: 0, 401: 0, 403: 0, 404: 0, 405: 0, 500: 0}
 file_size = 0
 
 for line in fileinput.input():
@@ -19,10 +19,10 @@ for line in fileinput.input():
 
     # get and update file_size
     file_size += int(line.split()[-1])
-    
+
     # print filesize and status code count every 10 lines and/or sigint
     # implement sigint after all code is working fine
     if count % 10 == 0 or signal.SIGINT:
-        print(f'File size: {file_size}')
+        print(f"File size: {file_size}")
         for code in codes:
-            print(f'{code}: {codes[code]}')
+            print(f"{code}: {codes[code]}")
