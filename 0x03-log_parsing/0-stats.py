@@ -1,64 +1,59 @@
 #!/usr/bin/python3
-""" read from stdin line by line and parse the input """
+"""parse and print information from logs"""
 
-import fileinput
-import re
-import signal
 import sys
+import re
+from typing import Optional
 
 
-# define signal handler
-def handler(signum, frame):
-    """handle SIGINT signal"""
-    print("\n^C")
+def print_info(total_size: int, status_codes: dict) -> None:
+    """print the information"""
+    print(f"Total file size: {total_size}")
+    for code, count in sorted(status_codes.items()):
+        if count > 0:
+            print(f"{code}: {count}")
 
 
-# register signal handler
-signal.signal(signal.SIGINT, handler)
+def get_info(line: str) -> Optional[dict]:
+    """read input from stdin and parse it to extract relevant information"""
+
+    pattern = re.compile(
+        r"\s*(?P<ip>\S+)\s*-\s*\[(?P<date>\d+\-\d+\-\d+ \d+:\d+:\d+\.\d+)\]\s*"
+        r'"GET /projects/260 HTTP/1.1"\s*(?P<status_code>\d+)\s*(?P<file_size>\d+)\s*'
+    )
+
+    match = pattern.match(line)
+
+    if match:
+        # extract status code and file_size
+        status_code = int(match.group("status_code"))
+        file_size = int(match.group("file_size"))
+        return {"status_code": status_code, "file_size": file_size}
+    else:
+        return None
 
 
-def print_stats():
-    """print stats"""
-
-    count = 0
+def main() -> None:
+    """run the code"""
     total_size = 0
-    codes = {200: 0, 301: 0, 400: 0, 401: 0, 403: 0, 404: 0, 405: 0, 500: 0}
-    regex = r'\b(?:(?:2(?:[0-4][0-9]|5[0-5])|[0-1]?[0-9]?[0-9])\.){3}(?:(?:2([0-4][0-9]|5[0-5])|[0-1]?[0-9]?[0-9]))\b - \[\d{2}/[A-Za-z]+/\d{4} [0-9]+:[0-9]+:[0-9]+\] "GET /projects/260 HTTP/1.1" [0-9]+ [0-9]+'
-
+    status_codes = {200: 0, 301: 0, 400: 0, 401: 0, 403: 0, 404: 0, 405: 0, 500: 0}
     try:
-        for line in fileinput.input():
-            # increment counter for every iteration
-            count += 1
+        line_count = 0
+        for line in sys.stdin:
+            line_count += 1
+            info = get_info(line)
+            if info:
+                total_size += info["file_size"]
+                status_code = info["status_code"]
+                if status_code in status_codes:
+                    status_codes[status_code] += 1
 
-            if not re.match(regex, line):
-                pass
+            if line_count % 10 == 0:
+                print_info(total_size, status_codes)
 
-            # get status code and file size from line and update counters
-            try:
-                code = int(line.split()[-2])
-                if code in codes:
-                    codes[code] += 1
-            except ValueError:
-                pass
-
-            try:
-                file_size = int(line.split()[-1])
-                total_size += file_size
-            except ValueError:
-                pass
-
-            # print stats every 10 lines and/or SIGINT
-            if count % 10 == 0:
-                print(f"Total file size: {total_size}")
-                for code, count in sorted(codes.items()):
-                    if count > 0:
-                        print(f"{code}: {count}")
-
-    except KeyboardInterrupt:
-        print_stats()
+    except (KeyboardInterrupt, EOFError):
+        print_info(total_size, status_codes)
 
 
-try:
-    print_stats()
-except KeyboardInterrupt:
-    pass
+if __name__ == "__main__":
+    main()
