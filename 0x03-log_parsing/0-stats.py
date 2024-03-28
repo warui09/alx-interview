@@ -4,6 +4,7 @@
 import fileinput
 import re
 import signal
+import sys
 
 
 # define signal handler
@@ -20,9 +21,9 @@ def print_stats():
     """print stats"""
 
     count = 0
+    total_size = 0
     codes = {200: 0, 301: 0, 400: 0, 401: 0, 403: 0, 404: 0, 405: 0, 500: 0}
-    file_size = 0
-    regex = r'\b(?:(?:2(?:[0-4][0-9]|5[0-5])|[0-1]?[0-9]?[0-9])\.){3}(?:(?:2([0-4][0-9]|5[0-5])|[0-1]?[0-9]?[0-9]))\b - \[\d{2}/[A-Za-z]+/\d{4} [0-9]+:[0-9]+:[0-9]+\] "[A-Za-z]+ /[A-Za-z]+/260 [A-Za-z]+/1\.1" [0-9]+ [0-9]+'
+    regex = r'\b(?:(?:2(?:[0-4][0-9]|5[0-5])|[0-1]?[0-9]?[0-9])\.){3}(?:(?:2([0-4][0-9]|5[0-5])|[0-1]?[0-9]?[0-9]))\b - \[\d{2}/[A-Za-z]+/\d{4} [0-9]+:[0-9]+:[0-9]+\] "GET /projects/260 HTTP/1.1" [0-9]+ [0-9]+'
 
     try:
         for line in fileinput.input():
@@ -32,21 +33,32 @@ def print_stats():
             if not re.match(regex, line):
                 pass
 
-            # get status code from line and increase counter
-            code = int(line.split()[-2])
-            if code in codes:
-                codes[code] += 1
+            # get status code and file size from line and update counters
+            try:
+                code = int(line.split()[-2])
+                if code in codes:
+                    codes[code] += 1
+            except ValueError:
+                pass
 
-            # get and update file_size
-            file_size += int(line.split()[-1])
+            try:
+                file_size = int(line.split()[-1])
+                total_size += file_size
+            except ValueError:
+                pass
 
-            # print filesize and status code count every 10 lines and/or sigint
+            # print stats every 10 lines and/or SIGINT
             if count % 10 == 0:
-                print(f"File size: {file_size}")
-                for code, count in codes.items():
-                    print(f"{code}: {count}")
+                print(f"Total file size: {total_size}")
+                for code, count in sorted(codes.items()):
+                    if count > 0:
+                        print(f"{code}: {count}")
+
     except KeyboardInterrupt:
         print_stats()
 
 
-print_stats()
+try:
+    print_stats()
+except KeyboardInterrupt:
+    pass
