@@ -5,13 +5,16 @@ import fileinput
 import re
 import signal
 
+
 # define signal handler
 def handler(signum, frame):
     """handle SIGINT signal"""
     print("\n^C")
 
+
 # register signal handler
 signal.signal(signal.SIGINT, handler)
+
 
 def print_stats():
     """print stats"""
@@ -44,5 +47,6 @@ def print_stats():
                     print(f"{code}: {count}")
     except KeyboardInterrupt:
         print_stats()
+
 
 print_stats()
