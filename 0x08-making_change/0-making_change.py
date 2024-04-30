@@ -4,6 +4,8 @@
 
 def makeChange(coins, total):
     """Finds smallest number of coins to make change"""
+    if coins is None:
+        return -1
 
     if total <= 0:
         return 0
@@ -13,7 +15,7 @@ def makeChange(coins, total):
 
     for coin in coins:
         num_coins = 0
-        if total > coin:
+        if total >= coin:
             num_coins = total // coin
             total_coins += num_coins
             total -= coin * num_coins
