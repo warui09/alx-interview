@@ -39,7 +39,7 @@ def isWinner(x, nums):
             continue
 
         # Maria's strategy: always choose the largest prime available
-        while counter < len(primes):
+        while counter <= len(primes):
             max_prime = primes[-1]
             integers = list(filter(lambda x: x % max_prime != 0, integers))
             largest_int = max(integers)
@@ -52,7 +52,7 @@ def isWinner(x, nums):
             continue
 
         # Ben's strategy: always choose the smallest prime available
-        while counter < len(primes):
+        while counter <= len(primes):
             min_prime = primes[0]
             integers = list(filter(lambda x: x % min_prime != 0, integers))
             if len(integers) == 0:
